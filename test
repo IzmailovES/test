@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+import sympy
+import sys
+import signal
+
+funcs = [lambda x: sympy.ntheory.isprime(x),
+         lambda x: x & 1 == 0 ]
+
+out = [sys.stdout,
+       sys.stderr]
+
+current = 0
+
+
+def sigusr1_handler(*args, **kwargs):
+    global current
+    current = not current
+
+def sigint_handler(*args, **kwargs):
+    exit(0)
+
+signal.signal(signal.SIGUSR1, sigusr1_handler)
+signal.signal(signal.SIGINT, sigint_handler)
+
+if __name__ == '__main__':
+    while True:
+        try:
+            for l in sys.stdin:
+                out[current].write(str(funcs[current](int(l))) + '\n')
+                out[current].flush()
+        except Exception as e:
+            print(e)
+            
+    
+    
